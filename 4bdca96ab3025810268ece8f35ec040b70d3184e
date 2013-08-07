@@ -1,0 +1,8 @@
+Verified+1: CI Master <tempest-ci@rbcon.com>
+Code-Review+2: Yisui Hu <yisuih@vmware.com>
+Code-Review+1: Mihnea Olteanu <molteanu@vmware.com>
+Submitted-by: Andrew Liu <aliu@vmware.com>
+Submitted-at: Wed, 07 Aug 2013 23:46:01 +0000
+Reviewed-on: http://tempest-reviews.eng.vmware.com/157
+Project: bosh_vcloud_cpi
+Branch: refs/heads/master
