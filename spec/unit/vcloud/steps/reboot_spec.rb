@@ -1,11 +1,12 @@
 require 'spec_helper'
+require_relative './shared_context'
 
 module VCloudCloud
   module Steps
     describe Reboot do
+      include_context "base"
+
       it "evoke reboot" do
-        client = double("vcloud client")
-        vm = double("vm entity")
         client.stub(:reload) { vm }
         client.stub(:logger) { Bosh::Clouds::Config.logger }
         reboot_link = "link"
