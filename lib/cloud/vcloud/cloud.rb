@@ -192,16 +192,23 @@ module VCloudCloud
 
     def attach_disk(vm_id, disk_id)
       steps "attach_disk(#{vm_id}, #{disk_id})" do |s|
-        s.state[:vm] = client.resolve_entity vm_id
+        vm = s.state[:vm] = client.resolve_entity vm_id
+
+        # vm.hardware_section will change, save current state of disks
+        disks_previous = Array.new(vm.hardware_section.hard_disks)
+
         s.state[:disk] = client.resolve_entity disk_id
         s.next Steps::AttachDetachDisk, :attach
+
+        vm = s.state[:vm] = client.resolve_entity vm_id
+        persistent_disk = get_newly_added_disk(vm, disks_previous)
 
         # update environment
         s.state[:env_metadata_key] = @entities['vm_metadata_key']
         s.next Steps::LoadAgentEnv
         s.state[:env]['disks'] ||= {}
         s.state[:env]['disks']['persistent'] ||= {}
-        s.state[:env]['disks']['persistent'][disk_id] = disk_id
+        s.state[:env]['disks']['persistent'][disk_id] = persistent_disk.disk_id
 
         save_agent_env s
       end
