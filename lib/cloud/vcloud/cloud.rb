@@ -22,9 +22,8 @@ module VCloudCloud
       @entities = @vcd['entities']
       raise ArgumentError, 'Invalid entities in VCD settings' unless @entities && @entities.is_a?(Hash)
 
-      @client_lock    = Mutex.new # lock for establishing client connection
-      @recompose_lock = Mutex.new # lock for recompose vApp
-      @delete_lock    = Mutex.new # lock for deleting vApp when there's only 1 vm left
+      @client_lock = Mutex.new # lock for establishing client connection
+      @vapp_lock   = Mutex.new # lock for recompose vApps / deleting vApps when there's only 1 vm left
     end
 
     def create_stemcell(image, _)
@@ -69,25 +68,31 @@ module VCloudCloud
           vm_href = nil
           existing_vm_hrefs = []
 
-          @recompose_lock.synchronize do
+          @vapp_lock.synchronize do
             begin
-              @logger.debug "Requesting container vApp: #{requested_name}"
+              @logger.debug "Checking for container vApp: #{requested_name}"
               container_vapp = client.vapp_by_name requested_name
             rescue ObjectNotFoundError
               # ignored, keep container_vapp nil
-              @logger.debug "Invalid container vApp: #{requested_name}"
+              @logger.debug "Container vApp: #{requested_name} does not exist"
             end
 
             if container_vapp
+              @logger.debug("Will add vms from #{vapp.name} to #{container_vapp.name}")
               existing_vm_hrefs = container_vapp.vms.map { |v| v.href }
               client.wait_entity container_vapp
+
               s.next Steps::Recompose, container_vapp.name, container_vapp, vm
               client.flush_cache
+
               vapp = s.state[:vapp] = client.reload vapp
               client.wait_entity vapp
+
+              @logger.debug("Deleting temporary vapp: #{vapp.name}")
               s.next Steps::Delete, vapp, true
             else
               # just rename the vApp
+              @logger.debug("Renaming #{container_vapp.name} to #{requested_name}")
               container_vapp = vapp
               s.next Steps::Recompose, requested_name, container_vapp
             end
@@ -150,7 +155,7 @@ module VCloudCloud
         # poweroff vm before we are able to delete it
         s.next Steps::PowerOff, :vm, true
 
-        @delete_lock.synchronize do
+        @vapp_lock.synchronize do
           vapp = s.state[:vapp] = client.resolve_link vm.container_vapp_link
           if vapp.vms.size == 1
             # Hack: if vApp is running, and the last VM is deleted, it is no longer stoppable and removable
