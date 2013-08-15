@@ -1,0 +1,9 @@
+Verified+1: CI Master <tempest-ci@rbcon.com>
+Code-Review+2: Yisui Hu <yisuih@vmware.com>
+Code-Review+1: Harshawardhan Gadgil <hgadgil@vmware.com>
+Verified+1: Harshawardhan Gadgil <hgadgil@vmware.com>
+Submitted-by: Harshawardhan Gadgil <hgadgil@vmware.com>
+Submitted-at: Thu, 15 Aug 2013 19:40:26 +0000
+Reviewed-on: http://tempest-reviews.eng.vmware.com/221
+Project: bosh_vcloud_cpi
+Branch: refs/heads/master
