@@ -1,0 +1,5 @@
+[gerrit]
+host=tempest-reviews.eng.vmware.com
+port=29418
+project=bosh_vcloud_cpi.git
+defaultbranch=master
