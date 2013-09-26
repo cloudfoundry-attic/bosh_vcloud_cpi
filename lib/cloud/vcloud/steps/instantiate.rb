@@ -24,7 +24,11 @@ module VCloudCloud
       def rollback
         vapp = state[:vapp]
         if vapp
-          link = vapp.remove_link
+          @logger.debug "Requesting vApp: #{vapp.name}"
+          vapp = client.vapp_by_name vapp.name
+
+          # Note that remove_link stay the same after vApp renaming.
+          link = vapp.remove_link true
           client.invoke_and_wait :delete, link if link
 
           # remove the item from state
