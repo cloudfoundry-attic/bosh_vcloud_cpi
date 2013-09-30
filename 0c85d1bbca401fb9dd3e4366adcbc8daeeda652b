@@ -1,0 +1,9 @@
+Verified+1: CI Master <cf-ci@rbcon.com>
+Code-Review+2: Justin Yu <justiny@vmware.com>
+Code-Review+1: Xin Yao <singerdmx@gmail.com>
+Verified+1: Xin Yao <singerdmx@gmail.com>
+Submitted-by: Justin Yu <justiny@vmware.com>
+Submitted-at: Mon, 30 Sep 2013 22:17:49 +0000
+Reviewed-on: http://tempest-reviews.eng.vmware.com/325
+Project: bosh_vcloud_cpi
+Branch: refs/heads/master
