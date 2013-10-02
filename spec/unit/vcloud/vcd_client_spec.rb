@@ -11,6 +11,23 @@ module VCloudCloud
     let(:client) { described_class.new(settings, logger)}
 
     describe ".invoke" do
+      it 'read control settings from configuration file' do
+        wait_max = client.instance_variable_get(:@wait_max)
+        expect(wait_max == VCloudClient::WAIT_MAX).to be_false
+
+        wait_delay = client.instance_variable_get(:@wait_delay)
+        expect(wait_delay == VCloudClient::WAIT_DELAY).to be_false
+
+        retry_max = client.instance_variable_get(:@retry_max)
+        expect(retry_max == VCloudClient::RETRY_MAX).to be_false
+
+        retry_delay = client.instance_variable_get(:@retry_delay)
+        expect(retry_delay == VCloudClient::RETRY_DELAY).to be_false
+
+        cookie_timeout = client.instance_variable_get(:@cookie_timeout)
+        expect(cookie_timeout == VCloudClient::COOKIE_TIMEOUT).to be_false
+      end
+
       it "fetch auth header" do
         login_response = double("login_response")
         cookies = "cookies string"
