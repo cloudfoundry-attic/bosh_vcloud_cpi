@@ -23,6 +23,16 @@ module VCloudSdk
         node.content = value
       end
 
+      def storage_profile=(value)
+        nodes = get_nodes("StorageProfile")
+        return unless nodes
+        node = nodes.first
+        return unless node
+        node["name"] = value["name"]
+        node["href"] = value["href"]
+      end
+
+
       def detach_disk_link
         get_nodes("Link", {"rel" => "disk:detach",
           "type" => MEDIA_TYPE[:DISK_ATTACH_DETACH_PARAMS]}, true).first

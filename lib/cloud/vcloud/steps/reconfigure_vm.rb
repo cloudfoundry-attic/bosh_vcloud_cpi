@@ -1,12 +1,13 @@
 module VCloudCloud
   module Steps
     class ReconfigureVM < Step
-      def perform(name, description, resource_pool, networks, &block)
+      def perform(name, description, resource_pool, networks,  &block)
         vapp = state[:vapp] = client.reload state[:vapp]
         vm = state[:vm] = client.reload state[:vm]
 
         vm.name = name unless name.nil?
         vm.description = description unless description.nil?
+
 
         unless resource_pool.nil?
           vm.change_cpu_count Integer(resource_pool['cpu'])
@@ -29,6 +30,7 @@ module VCloudCloud
                 :headers => { :content_type => VCloudSdk::Xml::MEDIA_TYPE[:VM] }
 
         state[:vm] = client.reload vm
+
       end
     end
   end

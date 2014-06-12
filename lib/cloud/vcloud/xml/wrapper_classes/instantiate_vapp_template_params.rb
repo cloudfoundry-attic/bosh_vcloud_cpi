@@ -27,12 +27,12 @@ module VCloudSdk
         @root["linkedClone"] = value.to_s
       end
 
+
       def source=(src)
         source_node = get_nodes("Source").first
         source_node["href"] = src["href"]
         source_node["id"] = src["id"]
         source_node["type"] = src["type"]
-        source_node["id"] = src["id"]
       end
 
       def set_locality=(locality)

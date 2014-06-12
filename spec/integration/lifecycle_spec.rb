@@ -34,6 +34,7 @@ describe VCloudCloud::Cloud do
           'vapp_catalog' => @vapp_catalog,
           'media_catalog' => @media_catalog,
           'media_storage_profile' => @storage_prof,
+          'vapp_storage_profile' => 'small',
           'vm_metadata_key' => @metadata_key,
           'description' => 'MicroBosh on vCloudDirector',
         }
