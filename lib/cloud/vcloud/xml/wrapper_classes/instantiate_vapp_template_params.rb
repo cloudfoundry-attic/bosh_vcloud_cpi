@@ -32,7 +32,6 @@ module VCloudSdk
         source_node["href"] = src["href"]
         source_node["id"] = src["id"]
         source_node["type"] = src["type"]
-        source_node["id"] = src["id"]
       end
 
       def set_locality=(locality)

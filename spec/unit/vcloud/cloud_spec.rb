@@ -28,6 +28,7 @@ module VCloudCloud
         client.stub(:resolve_link).with(vapp_link).and_return vapp
         client.stub(:resolve_entity).with(disk_id).and_return disk
         client.stub(:reload) { |obj| obj }
+        client.stub_chain('vdc.storage_profiles')
         client.stub(:flush_cache)
         client
       end
@@ -125,6 +126,10 @@ module VCloudCloud
           catalog_vapp_id, anything, anything, anything
         )
         trx.should_receive(:next).once.ordered.with(
+            Steps::EditVM,
+            anything
+        )
+        trx.should_receive(:next).once.ordered.with(
           Steps::CreateOrUpdateAgentEnv, anything, anything, anything
         )
         trx.should_receive(:next).once.ordered.with(
@@ -164,6 +169,10 @@ module VCloudCloud
           anything,
           anything,
           anything )
+        trx.should_receive(:next).once.ordered.with(
+            Steps::EditVM,
+            anything
+        )
         trx.should_receive(:next).once.ordered.with(
           Steps::Recompose, vapp_name, existing_vapp, vm)
         trx.should_receive(:next).once.ordered.with(
@@ -317,7 +326,6 @@ module VCloudCloud
         networks = { demo_network: network }
         vm.stub(:name) { vm_name }
         vapp.stub(:vms) { [vm, vm2] }
-        client.stub_chain("vdc.storage_profiles")
         state[:vm] = vm
         trx.should_receive(:next).once.ordered.with(
           Steps::PowerOff, anything, anything )
@@ -325,7 +333,7 @@ module VCloudCloud
           Steps::AddNetworks, anything )
         trx.should_receive(:next).once.ordered.with(
           Steps::ReconfigureVM, anything, anything, anything,
-          networks )
+          networks)
         trx.should_receive(:next).once.ordered.with(
           Steps::DeleteUnusedNetworks, anything )
         trx.should_receive(:next).once.ordered.with(
