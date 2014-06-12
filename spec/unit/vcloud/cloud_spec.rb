@@ -29,6 +29,7 @@ module VCloudCloud
         client.stub(:resolve_entity).with(disk_id).and_return disk
         client.stub(:reload) { |obj| obj }
         client.stub(:flush_cache)
+        client.stub_chain("vdc.storage_profiles").and_return []
         client
       end
 
@@ -325,7 +326,7 @@ module VCloudCloud
           Steps::AddNetworks, anything )
         trx.should_receive(:next).once.ordered.with(
           Steps::ReconfigureVM, anything, anything, anything,
-          networks )
+          networks, anything )
         trx.should_receive(:next).once.ordered.with(
           Steps::DeleteUnusedNetworks, anything )
         trx.should_receive(:next).once.ordered.with(
