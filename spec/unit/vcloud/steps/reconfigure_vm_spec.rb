@@ -21,6 +21,7 @@ module VCloudCloud
         vm = double("vm")
         vm.should_receive(:name=)
         vm.should_receive(:description=)
+        vm.should_receive(:storage_profile=)
         vm.stub(:change_cpu_count)
         vm.stub(:change_memory)
         vm.stub(:add_hard_disk)
@@ -46,13 +47,14 @@ module VCloudCloud
 
       let(:name) { "vm_name" }
       let(:description) { "vm description" }
+      let(:storage_profile) { "vapp_storage_profile" }
 
       it "reconfig a vm" do
         Transaction.perform("reboot", client) do |s|
           s.state[:vapp] = vapp
           s.state[:vm] = vm
           s.next described_class, name, description,
-            resource_pool, networks
+            resource_pool, networks, storage_profile
         end
       end
     end
