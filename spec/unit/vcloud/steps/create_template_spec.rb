@@ -35,7 +35,7 @@ module VCloudCloud
 
           # run test
           step = described_class.new state, client
-          step.perform template_name
+          step.perform template_name, nil
           expect(state[:vapp_template]).to be template
         end
       end

@@ -1,9 +1,10 @@
 module VCloudCloud
   module Steps
     class CreateTemplate < Step
-      def perform(name, &block)
+      def perform(name, storage_profile, &block)
         params = VCloudSdk::Xml::WrapperFactory.create_instance 'UploadVAppTemplateParams'
         params.name = name
+        params.storage_profile = storage_profile if storage_profile
         template = client.invoke :post, client.vdc.upload_link, :payload => params
 
         # commit states
