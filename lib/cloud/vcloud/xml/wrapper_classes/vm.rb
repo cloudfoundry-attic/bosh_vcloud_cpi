@@ -23,6 +23,10 @@ module VCloudSdk
         node.content = value
       end
 
+      def storage_profile=(storage_profile)
+        add_child(storage_profile) unless storage_profile.nil?
+      end
+
       def detach_disk_link
         get_nodes("Link", {"rel" => "disk:detach",
           "type" => MEDIA_TYPE[:DISK_ATTACH_DETACH_PARAMS]}, true).first

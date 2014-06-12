@@ -1,12 +1,13 @@
 module VCloudCloud
   module Steps
     class ReconfigureVM < Step
-      def perform(name, description, resource_pool, networks, &block)
+      def perform(name, description, resource_pool, networks, storage_profile, &block)
         vapp = state[:vapp] = client.reload state[:vapp]
         vm = state[:vm] = client.reload state[:vm]
 
         vm.name = name unless name.nil?
         vm.description = description unless description.nil?
+        vm.storage_profile = storage_profile
 
         unless resource_pool.nil?
           vm.change_cpu_count Integer(resource_pool['cpu'])
