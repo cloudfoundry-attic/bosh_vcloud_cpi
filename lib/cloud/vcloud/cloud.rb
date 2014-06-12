@@ -57,13 +57,20 @@ module VCloudCloud
         requested_name = environment && environment['vapp']
         vapp_name = requested_name ? "vapp-tmp-#{unique_name}" : agent_id
 
+        storage_profiles = client.vdc.storage_profiles || []
+        storage_profile = storage_profiles.find { |sp| sp['name'] == @entities['vapp_storage_profile'] }
+
         s.next Steps::Instantiate, catalog_vapp_id, vapp_name, description, disk_locality
         client.flush_cache  # flush cached vdc which contains vapp list
         vapp = s.state[:vapp]
-        vm = s.state[:vm] = vapp.vms[0]
+        s.state[:vm] = vapp.vms[0]
+
+        s.next Steps::EditVM, storage_profile
+        vm = s.state[:vm]
 
         # save original disk configuration
         s.state[:disks] = Array.new(vm.hardware_section.hard_disks)
+
         reconfigure_vm s, agent_id, description, resource_pool, networks
 
         vapp, vm =[s.state[:vapp], s.state[:vm]]

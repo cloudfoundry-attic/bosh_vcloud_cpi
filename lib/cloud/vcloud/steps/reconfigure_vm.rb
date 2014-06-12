@@ -1,7 +1,7 @@
 module VCloudCloud
   module Steps
     class ReconfigureVM < Step
-      def perform(name, description, resource_pool, networks, &block)
+      def perform(name, description, resource_pool, networks,  &block)
         vapp = state[:vapp] = client.reload state[:vapp]
         vm = state[:vm] = client.reload state[:vm]
 
@@ -29,7 +29,7 @@ module VCloudCloud
                 :headers => { :content_type => VCloudSdk::Xml::MEDIA_TYPE[:VM] }
 
         state[:vm] = client.reload vm
-      end
+     end
     end
   end
 end
