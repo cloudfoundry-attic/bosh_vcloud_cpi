@@ -57,6 +57,8 @@ module VCloudCloud
         requested_name = environment && environment['vapp']
         vapp_name = requested_name ? "vapp-tmp-#{unique_name}" : agent_id
 
+
+
         s.next Steps::Instantiate, catalog_vapp_id, vapp_name, description, disk_locality
         client.flush_cache  # flush cached vdc which contains vapp list
         vapp = s.state[:vapp]
@@ -64,7 +66,9 @@ module VCloudCloud
 
         # save original disk configuration
         s.state[:disks] = Array.new(vm.hardware_section.hard_disks)
-        reconfigure_vm s, agent_id, description, resource_pool, networks
+        storage_profiles = client.vdc.storage_profiles || []
+        storage_profile = storage_profiles.find { |sp| sp['name'] == @entities['vapp_storage_profile'] }
+        reconfigure_vm s, agent_id, description, resource_pool, networks, storage_profile
 
         vapp, vm =[s.state[:vapp], s.state[:vm]]
 
@@ -204,7 +208,7 @@ module VCloudCloud
           # load container vApp
           s.state[:vapp] = client.resolve_link vm.container_vapp_link
 
-          reconfigure_vm s, nil, nil, nil, networks
+          reconfigure_vm s, nil, nil, nil, networks, nil
 
           # update environment
           s.state[:env_metadata_key] = @entities['vm_metadata_key']
@@ -321,10 +325,10 @@ module VCloudCloud
       networks.map { |k,v| v['cloud_properties']['name'] }.uniq
     end
 
-    def reconfigure_vm(s, name, description, resource_pool, networks)
+    def reconfigure_vm(s, name, description, resource_pool, networks, storage_profile)
       net_names = network_names networks
       s.next Steps::AddNetworks, net_names
-      s.next Steps::ReconfigureVM, name, description, resource_pool, networks
+      s.next Steps::ReconfigureVM, name, description, resource_pool, networks, storage_profile
       s.next Steps::DeleteUnusedNetworks, net_names
     end
 
