@@ -29,11 +29,35 @@ module VCloudCloud
 
       def create_connection(href)
         uri = URI::parse(href)
-        net = Net::HTTP.new(uri.host, uri.port)
+        proxy_address, proxy_port = NetHttpHelper.new.http_proxy(uri)
+
+        net = Net::HTTP.new(uri.host, uri.port, proxy_address, proxy_port, nil, nil)
         net.use_ssl = uri.is_a?(URI::HTTPS)
         net.verify_mode = OpenSSL::SSL::VERIFY_NONE if net.use_ssl?
         net
       end
+    end
+  end
+
+  class NetHttpHelper
+
+    # Fetches for ENV variables the http proxies coordinates and
+    # Returns proxy adress and port expected by Net::HTTP.start
+    def http_proxy(uri)
+      if uri.scheme == 'https'
+        proxy = ENV['https_proxy']
+      else
+        proxy = ENV['http_proxy']
+      end
+      proxy_uri = URI.parse(proxy) unless proxy.nil?
+      if proxy_uri
+        proxy_address = proxy_uri.hostname
+        proxy_port = proxy_uri.port
+      else
+        proxy_address = nil
+        proxy_port = nil
+      end
+      return proxy_address, proxy_port
     end
   end
 end

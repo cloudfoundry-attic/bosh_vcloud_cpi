@@ -230,7 +230,8 @@ module VCloudCloud
       params[:headers].merge! options[:headers] if options[:headers]
       response = retry_for_network_issue do
         @logger.debug "REST REQ #{method.to_s.upcase} #{params[:url]} #{params[:headers].inspect} #{params[:cookies].inspect} #{params[:payload]}"
-        RestClient::Request.execute params do |response, request, result, &block|
+        restclient = RestClientHelper.new.setup_restclient(params)
+        restclient.execute  do |response, request, result, &block|
           @logger.debug "REST RES #{response.code} #{response.headers.inspect} #{response.body}"
           response.return! request, result, &block
         end
@@ -279,6 +280,18 @@ module VCloudCloud
         end
       end
       result
+    end
+  end
+
+  class RestClientHelper
+
+    def setup_restclient(params)
+      RestClient.proxy = proxy_from_env
+      RestClient::Request.new(params)
+    end
+
+    def proxy_from_env
+      ENV['https_proxy'] || ENV['HTTPS_PROXY'] || ENV['http_proxy'] || ENV['HTTP_PROXY']
     end
   end
 end
