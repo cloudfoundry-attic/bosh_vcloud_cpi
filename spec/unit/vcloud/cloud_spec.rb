@@ -367,7 +367,7 @@ module VCloudCloud
         trx.stub_chain("state.[]").with(:disk).and_return disk
         disk.stub(:urn).and_return result
 
-        subject.create_disk(size_mb).should == result
+        subject.create_disk(size_mb, {}).should == result
       end
 
       it "create disk with vm locality" do
@@ -382,7 +382,7 @@ module VCloudCloud
         trx.stub_chain("state.[]").with(:disk).and_return disk
         disk.stub(:urn).and_return result
 
-        subject.create_disk(size_mb, vm_locality).should == result
+        subject.create_disk(size_mb, {}, vm_locality).should == result
       end
     end
 
