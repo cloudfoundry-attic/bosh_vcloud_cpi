@@ -22,7 +22,8 @@ module VCloudCloud
         headers['Content-Length'] = size.to_s
         headers['Transfer-Encoding'] = 'chunked'
         request_type = Net::HTTP.const_get(http_method)
-        request = request_type.new(href, headers)
+        uri = URI(href)
+        request = request_type.new(uri.path, headers)
         request.body_stream = stream
         request
       end
