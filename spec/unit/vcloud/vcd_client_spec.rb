@@ -12,13 +12,13 @@ module VCloudCloud
 
     describe '.initialize' do
       it 'read control settings from configuration file' do
-        verify_control_settings :@wait_max => 400, :@wait_delay => 10, :@retry_max => 5, :@retry_delay => 500, :@cookie_timeout => 1200
+        verify_control_settings :@wait_max => 400, :@wait_delay => 10, :@retry_max => 5, :@retry_delay => 500, :@cookie_timeout => 1200, :@old_task_threshold => 600
       end
 
       it 'use default control settings if not specified in configuration file' do
         settings['entities']['control'] = nil
         verify_control_settings :@wait_max => VCloudClient::WAIT_MAX, :@wait_delay => VCloudClient::WAIT_DELAY, \
-          :@retry_max => VCloudClient::RETRY_MAX, :@retry_delay => VCloudClient::RETRY_DELAY, :@cookie_timeout => VCloudClient::COOKIE_TIMEOUT
+          :@retry_max => VCloudClient::RETRY_MAX, :@retry_delay => VCloudClient::RETRY_DELAY, :@cookie_timeout => VCloudClient::COOKIE_TIMEOUT, :@old_task_threshold => VCloudClient::OLD_TASK_THRESHOLD
       end
 
       private
@@ -255,6 +255,7 @@ module VCloudCloud
         task.stub(:operation).and_return(task_operation)
         task.stub(:details).and_return(task_details)
         task.stub(:status).and_return VCloudSdk::Xml::TASK_STATUS[:ERROR]
+        
 
         entity.stub(:running_tasks) {[task]}
         entity.stub(:prerunning_tasks) {[]}
@@ -274,7 +275,8 @@ module VCloudCloud
         task.stub(:urn).and_return(task_id)
         task.stub(:operation).and_return(task_operation)
         task.stub(:details).and_return(task_details)
-
+        task.stub(:start_time).and_return Time.now
+        
         entity.stub(:running_tasks) {[]}
         entity.stub(:prerunning_tasks) {[]}
         entity.stub(:tasks) {[task, task]}
@@ -282,6 +284,40 @@ module VCloudCloud
         task_info = "Task #{task_id} #{task_operation}, Details:#{task_details}"
         raise_error_info =Regexp.new("Some tasks failed: #{task_info}; #{task_info}")
         expect{client.wait_entity(entity)}.to raise_error raise_error_info
+      end
+      
+      it "idenitifies an old task" do
+        task = double("task")
+        task.stub(:start_time).and_return Time.parse("2016-05-11T10:08:17.880+01:00")
+        client.old_task?(task).should eq true
+      end
+      
+      it "ignores newer tasks" do
+        task = double("task")
+        task.stub(:start_time).and_return Time.now - 60
+        client.old_task?(task).should eq false
+      end
+      
+      it "filters old tasks appropriately" do
+        task1 = double("task")
+        task1.stub(:status).and_return "failed"
+        task1.stub(:start_time).and_return Time.parse("2016-05-11T10:08:17.880+01:00")
+        
+        task2 = double("task")
+        task2.stub(:status).and_return "failed"
+        task2.stub(:start_time).and_return Time.parse("2016-05-11T10:08:17.880+01:00")
+        
+        task3 = double("task")
+        task3.stub(:status).and_return "failed"
+        task3.stub(:start_time).and_return Time.now
+        
+        entity = double("entity")
+        entity.stub(:tasks) {[task1,task2,task3]}
+        
+        failed_tasks = client.get_failed_tasks(entity)
+        
+        failed_tasks.length.should be 1
+        failed_tasks[0].start_time.should eq task3.start_time
       end
     end
   end
