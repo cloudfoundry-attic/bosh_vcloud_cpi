@@ -255,6 +255,7 @@ module VCloudCloud
         task.stub(:operation).and_return(task_operation)
         task.stub(:details).and_return(task_details)
         task.stub(:status).and_return VCloudSdk::Xml::TASK_STATUS[:ERROR]
+        
 
         entity.stub(:running_tasks) {[task]}
         entity.stub(:prerunning_tasks) {[]}
@@ -274,7 +275,8 @@ module VCloudCloud
         task.stub(:urn).and_return(task_id)
         task.stub(:operation).and_return(task_operation)
         task.stub(:details).and_return(task_details)
-
+        task.stub(:start_time).and_return Time.now
+        
         entity.stub(:running_tasks) {[]}
         entity.stub(:prerunning_tasks) {[]}
         entity.stub(:tasks) {[task, task]}
@@ -312,7 +314,10 @@ module VCloudCloud
         entity = double("entity")
         entity.stub(:tasks) {[task1,task2,task3]}
         
-        puts client.get_failed_tasks(entity)
+        failed_tasks = client.get_failed_tasks(entity)
+        
+        failed_tasks.length.should be 1
+        failed_tasks[0].start_time.should eq task3.start_time
       end
     end
   end
